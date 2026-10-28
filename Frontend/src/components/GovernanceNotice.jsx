@@ -1,66 +1,64 @@
 import React from 'react';
-import { ShieldCheck, Scale, Lock, Eye, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Eye, Lock, Scale } from 'lucide-react';
 
 export function GovernanceNotice() {
   return (
-    <section id="governance" className="governance-section" aria-labelledby="governance-heading">
+    <section id="governance" className="governance-section-2d" aria-labelledby="governance-heading">
       <div className="container">
-        <div className="governance-box glass-panel">
-          <div className="governance-header-row">
-            <div className="governance-icon-badge">
-              <Scale size={24} className="text-blue" />
+        <div className="governance-card-container">
+          {/* Header */}
+          <div className="governance-header-group">
+            <div className="governance-badge">
+              <Scale size={16} className="text-primary-blue" />
+              <span>REGULATORY FRAMEWORK & GOVERNANCE</span>
             </div>
-            <div>
-              <span className="badge-institutional">Regulatory Framework & Mandate</span>
-              <h2 id="governance-heading" className="governance-title">
-                Human-in-the-Loop Regulatory Mandate
-              </h2>
+            <h2 id="governance-heading" className="governance-title">
+              Human-in-the-Loop Regulatory Mandate
+            </h2>
+          </div>
+
+          {/* Mandatory Governance Statement */}
+          <div className="governance-highlight-card">
+            <div className="quote-accent-bar" />
+            <div className="governance-statement-content">
+              <p className="governance-primary-statement">
+                <strong>"PRAGYAN-AICTE provides AI-assisted decision support. Statutory scrutiny, inspections where required and final regulatory decisions remain with competent AICTE authorities."</strong>
+              </p>
+              <p className="governance-secondary-statement">
+                The platform does not automatically approve or reject any technical institution application. All findings, discrepancy alerts, and ratio evaluations are evidentiary recommendations prepared for the consideration of authorized Scrutiny and Hearing Committees under the All India Council for Technical Education Act, 1987.
+              </p>
             </div>
           </div>
 
-          <div className="governance-statement-card">
-            <div className="statement-quote-bar" />
-            <p className="statement-lead">
-              <strong>Statutory Decision Determinism:</strong> PRAGYAN operates exclusively as an
-              intelligent pre-scrutiny assistant and evidentiary cross-referencing engine. In strict
-              accordance with the <strong>All India Council for Technical Education Act, 1987</strong>,
-              all final regulatory determinism, Extension of Approval (EoA) sanctions, deficiency judgments,
-              and punitive orders remain the exclusive prerogative of authorized AICTE Scrutiny Committees,
-              Regional Officers, Hearing Committees, and the Appellate Authority.
-            </p>
-          </div>
-
-          <div className="governance-pillars-grid">
-            <div className="pillar-item">
-              <div className="pillar-icon-box">
-                <ShieldCheck size={20} className="text-green" />
+          {/* Three Core Governance Pillars */}
+          <div className="governance-pillars-row">
+            <div className="gov-pillar-card">
+              <div className="gov-pillar-icon-box">
+                <ShieldCheck size={20} className="pillar-icon-green" />
               </div>
-              <h4 className="pillar-title">Zero-Hallucination Triangulation</h4>
-              <p className="pillar-desc">
-                Every extracted finding is hard-anchored to a verifiable coordinate, page index, and
-                cryptographic SHA-256 hash. The system is barred from heuristic extrapolation.
+              <h3 className="gov-pillar-title">Evidence-Anchored Findings</h3>
+              <p className="gov-pillar-desc">
+                Every observation is referenced directly to document page coordinates, cadastral records, and cryptographic hashes without heuristic speculation.
               </p>
             </div>
 
-            <div className="pillar-item">
-              <div className="pillar-icon-box">
-                <Eye size={20} className="text-blue" />
+            <div className="gov-pillar-card">
+              <div className="gov-pillar-icon-box">
+                <Eye size={20} className="pillar-icon-blue" />
               </div>
-              <h4 className="pillar-title">Explainable Scrutiny (XAI)</h4>
-              <p className="pillar-desc">
-                No opaque scoring models. Scrutiny findings provide transparent, side-by-side citations
-                comparing submitted applicant documents directly against Approval Process Handbook clauses.
+              <h3 className="gov-pillar-title">Explainable Scrutiny (XAI)</h3>
+              <p className="gov-pillar-desc">
+                Transparent side-by-side citations present submitted claims directly against codified clauses from the Approval Process Handbook (APH 2026-27).
               </p>
             </div>
 
-            <div className="pillar-item">
-              <div className="pillar-icon-box">
-                <Lock size={20} className="text-blue" />
+            <div className="gov-pillar-card">
+              <div className="gov-pillar-icon-box">
+                <Lock size={20} className="pillar-icon-navy" />
               </div>
-              <h4 className="pillar-title">Sovereign Data Isolation</h4>
-              <p className="pillar-desc">
-                All institutional dossiers, biometric matrices, and land title records are processed in
-                sandboxed jurisdictional enclaves adhering to Government of India data localization guidelines.
+              <h3 className="gov-pillar-title">Sovereign Data Protection</h3>
+              <p className="gov-pillar-desc">
+                All institutional applications, municipal NOCs, and faculty records are processed within sandboxed environments adhering to Government of India data localization principles.
               </p>
             </div>
           </div>

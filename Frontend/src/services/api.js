@@ -8,7 +8,6 @@ import {
   DEMO_APPLICATIONS,
   DEMO_REGULATORY_RULES,
   DEMO_AUDIT_LOG,
-  DEMO_ALERTS,
 } from '../data/mockData';
 
 const BACKEND_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';

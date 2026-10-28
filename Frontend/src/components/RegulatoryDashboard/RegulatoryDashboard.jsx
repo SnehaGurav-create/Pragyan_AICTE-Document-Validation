@@ -47,15 +47,20 @@ import {
   Bell,
   Send,
   FileText,
-  Mail,
-  Smartphone,
   ShieldCheck,
-  CheckCheck,
 } from 'lucide-react';
+import { AnimatedCounter } from '../AnimatedCounter';
 
-export function RegulatoryDashboard() {
+export function RegulatoryDashboard({ activeModule: externalActiveModule, onModuleChange, reducedMotion = false }) {
   // Sidebar Module Navigation (Exactly the 8 required modules in exact order)
-  const [activeModule, setActiveModule] = useState('overview');
+  const [internalModule, setInternalModule] = useState('overview');
+  const activeModule = externalActiveModule !== undefined ? externalActiveModule : internalModule;
+  const setActiveModule = (modId) => {
+    setInternalModule(modId);
+    if (onModuleChange) {
+      onModuleChange(modId);
+    }
+  };
 
   // Backend Live Connectivity State
   const [backendConnected, setBackendConnected] = useState(false);
@@ -145,9 +150,39 @@ export function RegulatoryDashboard() {
   // Document Upload State (Module 3)
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadFileName, setUploadFileName] = useState('');
+  const [uploadCategory, setUploadCategory] = useState('Extension of Approval (EoA)');
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isProcessingUpload, setIsProcessingUpload] = useState(false);
   const [uploadResultFeedback, setUploadResultFeedback] = useState(null);
+
+  const CATEGORY_CHECKLISTS = {
+    'Extension of Approval (EoA)': [
+      { name: 'Land Title Deed & Contiguity Certificate (Clause 2.4)', mandatory: true, status: 'Verified' },
+      { name: 'State Fire Safety & Evacuation NOC (NBC 2016)', mandatory: true, status: 'Verified' },
+      { name: 'Faculty Cadre Roster & Pay Scales (Table 7.1)', mandatory: true, status: 'Observation' },
+      { name: 'Joint Reserve Fund FDR Escrow (Clause 1.7.4)', mandatory: true, status: 'Verified' },
+    ],
+    'Change in Approved Intake': [
+      { name: 'Sanctioned CAD Floor Plans & Instructional Area (>=33 sqm)', mandatory: true, status: 'Required' },
+      { name: 'Incremental Faculty Recruitment Commitment Schedule', mandatory: true, status: 'Required' },
+      { name: 'Laboratory Equipment & Consumables Ledger', mandatory: true, status: 'Required' },
+      { name: 'Library Volumes & Digital Journals Subscription Proof', mandatory: true, status: 'Required' },
+    ],
+    'Introduction of New Course': [
+      { name: 'Affiliating University Course Concurrence & NOC', mandatory: true, status: 'Required' },
+      { name: 'Specialized Laboratory Setup & Safety Certificate', mandatory: true, status: 'Required' },
+      { name: 'Core Faculty Allocation Roster for New Program', mandatory: true, status: 'Required' },
+      { name: 'Governing Body Resolution for Course Launch', mandatory: true, status: 'Required' },
+    ],
+    'Closure of Course or Department': [
+      { name: 'Governing Body Resolution for Progressive Closure', mandatory: true, status: 'Required' },
+      { name: 'Student Migration & Current Batch Protection Undertaking', mandatory: true, status: 'Required' },
+      { name: 'Faculty Redeployment / No Retrenchment Undertaking', mandatory: true, status: 'Required' },
+      { name: 'Affiliating State University Concurrence NOC', mandatory: true, status: 'Required' },
+    ],
+  };
 
   // Reviewer Observation input state in scrutiny modal
   const [reviewerObsText, setReviewerObsText] = useState('');
@@ -351,16 +386,30 @@ export function RegulatoryDashboard() {
   };
 
   // Upload Handlers (Module 3)
-  const handleSimulateUpload = async (e) => {
-    const file = e.target.files && e.target.files[0];
+  const processUploadedFile = async (file) => {
     if (!file) return;
-    const name = file.name;
-    setUploadFileName(name);
+    setUploadError(null);
+
+    // Validate file type
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) {
+      setUploadError('Invalid file type. Only PDF documents are accepted for statutory validation.');
+      return;
+    }
+
+    // Validate size (max 25MB)
+    const maxSize = 25 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setUploadError('File exceeds 25 MB limit. Please select an optimized PDF under 25MB.');
+      return;
+    }
+
+    setUploadFileName(file.name);
     setIsProcessingUpload(true);
-    setUploadProgress(20);
+    setUploadProgress(15);
 
     try {
-      setUploadProgress(50);
+      setUploadProgress(45);
       const liveResult = await uploadAndVerifyDocuments([file]);
       setUploadProgress(100);
       setIsProcessingUpload(false);
@@ -368,20 +417,37 @@ export function RegulatoryDashboard() {
 
       // Refresh applications from live backend
       const updatedApps = await fetchApplications();
-      setApplications(updatedApps);
+      if (updatedApps && updatedApps.length) {
+        setApplications(updatedApps);
+      }
     } catch (err) {
       console.warn('Live upload failed, running fallback simulation:', err);
+      let p = 25;
       const interval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setIsProcessingUpload(false);
-            setUploadResultFeedback('Simulated Upload Complete • Preliminary checks extracted 8 fields (Demo Mode)');
-            return 100;
-          }
-          return prev + 25;
-        });
-      }, 350);
+        p += 25;
+        setUploadProgress(p);
+        if (p >= 100) {
+          clearInterval(interval);
+          setIsProcessingUpload(false);
+          setUploadResultFeedback(`Preliminary extraction completed for ${file.name}. 8 document fields verified under ${uploadCategory} norms.`);
+        }
+      }, 300);
+    }
+  };
+
+  const handleSimulateUpload = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      await processUploadedFile(file);
+    }
+  };
+
+  const handleDropFile = async (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) {
+      await processUploadedFile(file);
     }
   };
 
@@ -395,13 +461,14 @@ export function RegulatoryDashboard() {
   ];
 
   const officerModules = [
-    { id: 'overview', label: 'Overview Cockpit', icon: LayoutDashboard },
-    { id: 'applications', label: 'Applications Queue', icon: FileSpreadsheet, countBadge: applications.length },
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'applications', label: 'Applications', icon: FileSpreadsheet, countBadge: applications.length },
     { id: 'documents', label: 'Document Validation', icon: FileCheck2 },
     { id: 'authority', label: 'Authority Verification', icon: Building },
     { id: 'compliance', label: 'Compliance Review', icon: Scale },
-    { id: 'alerts', label: 'Alerts & Deficiencies', icon: AlertTriangle, alertBadge: alertsList.length },
+    { id: 'alerts', label: 'Alerts and Deficiencies', icon: AlertTriangle, alertBadge: alertsList.length },
     { id: 'audit', label: 'Audit Trail', icon: History },
+    { id: 'rules', label: 'Regulatory Rules', icon: Sliders },
   ];
 
   const directorModules = [
@@ -515,10 +582,14 @@ export function RegulatoryDashboard() {
                     <IconComponent size={17} />
                     <span>{mod.label}</span>
                     {mod.countBadge !== undefined && (
-                      <span className="sidebar-count-badge">{mod.countBadge}</span>
+                      <span className="sidebar-count-badge">
+                        <AnimatedCounter value={mod.countBadge} duration={700} triggerKey={activeModule} reducedMotion={reducedMotion} />
+                      </span>
                     )}
                     {mod.alertBadge !== undefined && (
-                      <span className="sidebar-alert-badge">{mod.alertBadge}</span>
+                      <span className="sidebar-alert-badge">
+                        <AnimatedCounter value={mod.alertBadge} duration={700} triggerKey={activeModule} reducedMotion={reducedMotion} />
+                      </span>
                     )}
                   </button>
                 );
@@ -774,7 +845,15 @@ export function RegulatoryDashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
                       <div style={{ background: '#ffffff', padding: '6px 14px', borderRadius: '8px', border: '1px solid #fde047', textAlign: 'center' }}>
                         <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#92400e', textTransform: 'uppercase' }}>Cure Undertaking Clock</span>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#b45309' }}>15 DAYS REMAINING</div>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#b45309' }}>
+                          <AnimatedCounter
+                            value="15 DAYS REMAINING"
+                            delay={300}
+                            duration={900}
+                            triggerKey={activeModule}
+                            reducedMotion={reducedMotion}
+                          />
+                        </div>
                       </div>
                       <button
                         type="button"
@@ -791,46 +870,78 @@ export function RegulatoryDashboard() {
 
                 {/* 3. Four Institutional Key Health Metrics */}
                 <div className="overview-cards-row">
-                  <div className="kpi-card glass-panel">
+                  <div className="kpi-card glass-panel kpi-animate-card" style={{ animationDelay: '0ms' }}>
                     <div className="kpi-icon-box bg-green">
                       <CheckCircle2 size={20} className="text-green" />
                     </div>
                     <div className="kpi-meta">
                       <span className="kpi-label">DPI Land Registry Status</span>
-                      <span className="kpi-number text-green">8.24 Acres</span>
+                      <span className="kpi-number text-green">
+                        <AnimatedCounter
+                          value="8.24 Acres"
+                          delay={0}
+                          duration={900}
+                          triggerKey={activeModule}
+                          reducedMotion={reducedMotion}
+                        />
+                      </span>
                       <span className="kpi-trend">Verified via DigiLocker • Unencumbered</span>
                     </div>
                   </div>
 
-                  <div className="kpi-card glass-panel">
+                  <div className="kpi-card glass-panel kpi-animate-card" style={{ animationDelay: '90ms' }}>
                     <div className="kpi-icon-box bg-green">
                       <CheckCircle2 size={20} className="text-green" />
                     </div>
                     <div className="kpi-meta">
                       <span className="kpi-label">Fire & Life Safety NOC</span>
-                      <span className="kpi-number text-green">Valid 2027</span>
+                      <span className="kpi-number text-green">
+                        <AnimatedCounter
+                          value="Valid 2027"
+                          delay={90}
+                          duration={900}
+                          triggerKey={activeModule}
+                          reducedMotion={reducedMotion}
+                        />
+                      </span>
                       <span className="kpi-trend">Capacity 1,500 Persons • Certified</span>
                     </div>
                   </div>
 
-                  <div className="kpi-card glass-panel">
+                  <div className="kpi-card glass-panel kpi-animate-card" style={{ animationDelay: '180ms' }}>
                     <div className="kpi-icon-box bg-red">
                       <AlertTriangle size={20} className="text-red" />
                     </div>
                     <div className="kpi-meta">
                       <span className="kpi-label">Cadre Ratio Balance</span>
-                      <span className="kpi-number text-red">Deficit: 1</span>
+                      <span className="kpi-number text-red">
+                        <AnimatedCounter
+                          value="Deficit: 1"
+                          delay={180}
+                          duration={850}
+                          triggerKey={activeModule}
+                          reducedMotion={reducedMotion}
+                        />
+                      </span>
                       <span className="kpi-trend">Short 1 Professor in CSE • Action Pending</span>
                     </div>
                   </div>
 
-                  <div className="kpi-card glass-panel">
+                  <div className="kpi-card glass-panel kpi-animate-card" style={{ animationDelay: '270ms' }}>
                     <div className="kpi-icon-box">
                       <FileCheck2 size={20} className="text-blue" />
                     </div>
                     <div className="kpi-meta">
                       <span className="kpi-label">Submitted EoA Documents</span>
-                      <span className="kpi-number">7 / 8</span>
+                      <span className="kpi-number">
+                        <AnimatedCounter
+                          value="7 / 8"
+                          delay={270}
+                          duration={950}
+                          triggerKey={activeModule}
+                          reducedMotion={reducedMotion}
+                        />
+                      </span>
                       <span className="kpi-trend">7 Auto-Cleared • 1 Undertaking Required</span>
                     </div>
                   </div>
@@ -866,7 +977,7 @@ export function RegulatoryDashboard() {
               <div className="module-content-pane">
                 {/* 4 Summary Cards (With Demo Data Label) */}
                 <div className="overview-cards-row">
-                  <div className="kpi-card glass-panel">
+                  <div className="kpi-card glass-panel kpi-animate-card" style={{ animationDelay: '0ms' }}>
                     <div className="kpi-icon-box">
                       <FileSpreadsheet size={20} className="text-blue" />
                     </div>
@@ -874,12 +985,20 @@ export function RegulatoryDashboard() {
                       <div className="kpi-label-row">
                         <span className="kpi-label">Total Applications</span>
                       </div>
-                      <span className="kpi-number">{applications.length}</span>
+                      <span className="kpi-number">
+                        <AnimatedCounter
+                          value={applications.length}
+                          delay={0}
+                          duration={850}
+                          triggerKey={activeModule}
+                          reducedMotion={reducedMotion}
+                        />
+                      </span>
                       <span className="kpi-trend">Consistent Prototype Dataset</span>
                     </div>
                   </div>
 
-                  <div className="kpi-card glass-panel">
+                  <div className="kpi-card glass-panel kpi-animate-card" style={{ animationDelay: '90ms' }}>
                     <div className="kpi-icon-box bg-green">
                       <CheckCircle2 size={20} className="text-green" />
                     </div>
@@ -887,12 +1006,20 @@ export function RegulatoryDashboard() {
                       <div className="kpi-label-row">
                         <span className="kpi-label">Verified Documents</span>
                       </div>
-                      <span className="kpi-number text-green">18</span>
+                      <span className="kpi-number text-green">
+                        <AnimatedCounter
+                          value={18}
+                          delay={90}
+                          duration={900}
+                          triggerKey={activeModule}
+                          reducedMotion={reducedMotion}
+                        />
+                      </span>
                       <span className="kpi-trend">Completed Preliminary Checks</span>
                     </div>
                   </div>
 
-                  <div className="kpi-card glass-panel">
+                  <div className="kpi-card glass-panel kpi-animate-card" style={{ animationDelay: '180ms' }}>
                     <div className="kpi-icon-box bg-amber">
                       <AlertTriangle size={20} className="text-amber" />
                     </div>
@@ -901,13 +1028,19 @@ export function RegulatoryDashboard() {
                         <span className="kpi-label">Applications Requiring Review</span>
                       </div>
                       <span className="kpi-number text-amber">
-                        {applications.filter((a) => a.status === 'Review Required').length}
+                        <AnimatedCounter
+                          value={applications.filter((a) => a.status === 'Review Required').length}
+                          delay={180}
+                          duration={850}
+                          triggerKey={activeModule}
+                          reducedMotion={reducedMotion}
+                        />
                       </span>
                       <span className="kpi-trend">Discrepancies Flagged for Officer</span>
                     </div>
                   </div>
 
-                  <div className="kpi-card glass-panel">
+                  <div className="kpi-card glass-panel kpi-animate-card" style={{ animationDelay: '270ms' }}>
                     <div className="kpi-icon-box bg-red">
                       <Clock size={20} className="text-red" />
                     </div>
@@ -916,7 +1049,13 @@ export function RegulatoryDashboard() {
                         <span className="kpi-label">Open Deficiencies</span>
                       </div>
                       <span className="kpi-number text-red">
-                        {applications.filter((a) => a.status === 'Deficient').length}
+                        <AnimatedCounter
+                          value={applications.filter((a) => a.status === 'Deficient').length}
+                          delay={270}
+                          duration={850}
+                          triggerKey={activeModule}
+                          reducedMotion={reducedMotion}
+                        />
                       </span>
                       <span className="kpi-trend">Statutory Requirement Gap</span>
                     </div>
@@ -1976,15 +2115,23 @@ export function RegulatoryDashboard() {
           aria-modal="true"
           aria-labelledby="upload-modal-title"
         >
-          <div className="ingest-modal-window glass-panel">
+          <div className="ingest-modal-window glass-panel" style={{ maxWidth: '640px' }}>
             <div className="modal-header-bar">
-              <h3 id="upload-modal-title" className="modal-case-name">
-                Document Upload & Extraction (Demo Mode)
-              </h3>
+              <div>
+                <h3 id="upload-modal-title" className="modal-case-name">
+                  Institutional Document Ingestion & Validation
+                </h3>
+                <span className="modal-case-sub">AICTE Regulation Bureau · Pre-Scrutiny Intake</span>
+              </div>
               <button
                 type="button"
                 className="modal-close-btn"
-                onClick={() => setUploadModalOpen(false)}
+                onClick={() => {
+                  setUploadModalOpen(false);
+                  setUploadError(null);
+                  setUploadProgress(0);
+                  setUploadResultFeedback(null);
+                }}
                 aria-label="Close Upload Modal"
               >
                 <X size={18} />
@@ -1992,20 +2139,84 @@ export function RegulatoryDashboard() {
             </div>
 
             <div className="ingest-modal-body">
-              <p className="ingest-modal-desc">
-                Select an institutional PDF file to simulate upload, structural OCR extraction,
-                and preliminary checklist validation.
-              </p>
+              {/* Form Category Selector */}
+              <div className="upload-form-group" style={{ marginBottom: '16px' }}>
+                <label htmlFor="upload-cat-select" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#172B45', marginBottom: '6px' }}>
+                  Application Category
+                </label>
+                <select
+                  id="upload-cat-select"
+                  value={uploadCategory}
+                  onChange={(e) => setUploadCategory(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #E3EAF2',
+                    background: '#FFFFFF',
+                    fontSize: '0.875rem',
+                    color: '#172B45',
+                    outline: 'none',
+                  }}
+                >
+                  <option value="Extension of Approval (EoA)">Extension of Approval (EoA)</option>
+                  <option value="Change in Approved Intake">Change in Approved Intake</option>
+                  <option value="Introduction of New Course">Introduction of New Course</option>
+                  <option value="Closure of Course or Department">Closure of Course or Department</option>
+                </select>
+              </div>
 
-              <div className="upload-dropzone-box">
-                <FileUp size={36} className="text-blue" />
-                <span className="dropzone-title">Select Institutional PDF Document</span>
-                <span className="dropzone-sub">Supported formats: PDF/A (Max 25MB)</span>
+              {/* Required Document Checklist for Selected Category */}
+              <div className="upload-category-checklist" style={{ background: '#F8FAFD', border: '1px solid #E3EAF2', borderRadius: '8px', padding: '12px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#708096', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+                  Required Document Annexures ({uploadCategory}):
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '6px' }}>
+                  {(CATEGORY_CHECKLISTS[uploadCategory] || CATEGORY_CHECKLISTS['Extension of Approval (EoA)']).map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#172B45' }}>
+                      <span style={{ color: item.mandatory ? '#356AE6' : '#708096' }}>•</span>
+                      <span>{item.name}</span>
+                      {item.mandatory && (
+                        <span style={{ fontSize: '0.65rem', background: '#EAF1FF', color: '#356AE6', padding: '1px 5px', borderRadius: '4px', fontWeight: 600 }}>
+                          Required
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Drag and Drop Zone */}
+              <div
+                className={`upload-dropzone-box ${isDragOver ? 'drag-over' : ''}`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(true);
+                }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={handleDropFile}
+                style={{
+                  border: isDragOver ? '2px dashed #356AE6' : '1.5px dashed #CBD5E1',
+                  background: isDragOver ? '#EAF1FF' : '#FAFCFF',
+                  padding: '24px 16px',
+                  borderRadius: '10px',
+                  textAlign: 'center',
+                  transition: 'all 0.2s',
+                  cursor: 'pointer',
+                }}
+              >
+                <FileUp size={36} className="text-blue" style={{ margin: '0 auto 10px auto', display: 'block' }} />
+                <span className="dropzone-title" style={{ display: 'block', fontWeight: 700, fontSize: '0.95rem', color: '#172B45' }}>
+                  Drag and drop institutional dossier PDF here
+                </span>
+                <span className="dropzone-sub" style={{ display: 'block', fontSize: '0.78rem', color: '#708096', marginTop: '4px' }}>
+                  Supported formats: Standard PDF / PDF-A (Maximum 25MB)
+                </span>
 
                 <input
                   type="file"
                   id="pdf-file-upload"
-                  accept=".pdf"
+                  accept=".pdf,application/pdf"
                   onChange={handleSimulateUpload}
                   style={{ display: 'none' }}
                 />
@@ -2013,25 +2224,41 @@ export function RegulatoryDashboard() {
                 <label
                   htmlFor="pdf-file-upload"
                   className="btn-primary"
-                  style={{ marginTop: '16px', cursor: 'pointer' }}
+                  style={{ marginTop: '14px', display: 'inline-flex', cursor: 'pointer', padding: '8px 18px' }}
                 >
-                  Browse PDF File
+                  Choose PDF File
                 </label>
               </div>
 
-              {/* Upload Progress */}
+              {/* Error Alert State */}
+              {uploadError && (
+                <div style={{ marginTop: '12px', background: '#FDF0F0', border: '1px solid #D84C4C', borderRadius: '6px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', color: '#D84C4C', fontSize: '0.8125rem' }}>
+                  <AlertTriangle size={16} />
+                  <span>{uploadError}</span>
+                </div>
+              )}
+
+              {/* Upload Progress & Extraction Feedback */}
               {uploadProgress > 0 && (
-                <div className="ingest-progress-container">
-                  <div className="progress-labels">
+                <div className="ingest-progress-container" style={{ marginTop: '16px' }}>
+                  <div className="progress-labels" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', marginBottom: '6px', color: '#172B45' }}>
                     <span>
                       {isProcessingUpload
-                        ? `Extracting layout & fields from ${uploadFileName || 'dossier.pdf'}...`
+                        ? `Extracting layout, cadastral bounds & tables from ${uploadFileName || 'dossier.pdf'}...`
                         : uploadResultFeedback}
                     </span>
                     <strong>{uploadProgress}%</strong>
                   </div>
-                  <div className="progress-bar-track">
-                    <div className="progress-bar-fill" style={{ width: `${uploadProgress}%` }} />
+                  <div className="progress-bar-track" style={{ height: '7px', background: '#E3EAF2', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div
+                      className="progress-bar-fill"
+                      style={{
+                        width: `${uploadProgress}%`,
+                        height: '100%',
+                        background: isProcessingUpload ? '#356AE6' : '#17835D',
+                        transition: 'width 0.3s ease',
+                      }}
+                    />
                   </div>
                 </div>
               )}

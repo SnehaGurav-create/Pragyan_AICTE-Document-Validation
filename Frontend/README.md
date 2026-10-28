@@ -18,33 +18,30 @@
 
 ## 2. Architecture & Page Flow
 
-The application is structured as a continuous single-page regulatory portal:
+The application is engineered as a lightweight, high-performance, single-page regulatory portal:
 
-1. **Full-Screen 3D Hero (Opening Viewport)**
-   - **Eyebrow:** `AICTE • REGULATION BUREAU • SIH 2026`
-   - **Headline:** *"Verify documents. Validate compliance. Support better scrutiny."*
-   - **Description:** *"An AI-powered decision-support platform for preliminary validation of technical institution applications, document authentication, discrepancy detection and regulatory compliance review."*
-   - **Supporting Note:** *"Evidence-linked findings. Traceable verification. Human-led regulatory decisions."*
-   - **Visuals:** Pinned, full-screen React Three Fiber canvas depicting floating transparent architectural glass documents with physical depth, chamfer reflections, and ambient studio lighting.
+1. **Sticky Institutional Navigation Bar**
+   - Custom geometric document-check logo in pure vector SVG.
+   - Institutional branding: `PRAGYAN-AICTE` · `Regulation Bureau · Smart Scrutiny`.
+   - Direct section navigation: `Overview`, `Applications`, `Verification`, `Compliance`, `Dashboard`.
+   - Live Role Switcher (Scrutiny Officer, Principal, Regional Director) and Notification Drawer.
 
-2. **Scroll-Driven 3D Intelligence Sequence (320vh Track)**
-   Synchronizes camera trajectories, layer separation, scanning lasers, and verification nodes across 6 contextual regulatory stages:
-   - **Stage 1:** Application and Document Intake
-   - **Stage 2:** OCR and Information Extraction
-   - **Stage 3:** Document Integrity and Anomaly Checks
-   - **Stage 4:** Issuing-Authority Verification
-   - **Stage 5:** Regulatory Compliance Assessment
-   - **Stage 6:** Evidence-Linked Scrutiny
+2. **2D Animated Hero Section & Vector Document Intelligence**
+   - **Eyebrow:** `AICTE · REGULATION BUREAU · SIH 2026`
+   - **Headline:** *"Bring clarity to every application."*
+   - **Supporting Lead:** *"Intelligent document validation, verification and regulatory compliance assistance for technical institution approvals."*
+   - **Core Principles:** Evidence-linked findings · Traceable verification · Human-led decisions.
+   - **Vector Motion Canvas:** Layered institutional documents, animated scanning laser sweep, verification node anchors, floating shield of compliance, and real-time verification telemetry panel. 100% 2D SVG & CSS, zero WebGL overhead.
 
-3. **Concise Verification Workflow Strip**
-   Explains the four-step decision-support protocol:
-   - **01. Submit:** Receive an institution application and its supporting documents.
-   - **02. Validate:** Check completeness, extract information, and identify inconsistencies.
-   - **03. Verify:** Compare records against authorized sources where available.
-   - **04. Review:** Present evidence-linked findings to authorized scrutiny officers.
+3. **Four-Step Verification Workflow Stepper**
+   - Title: *"From submission to evidence-led scrutiny."*
+   - **01 — Application Intake:** Ingest institutional application details and supporting documents.
+   - **02 — Intelligent Validation:** Extract information, check completeness, identify expired documents, and cross-compare records.
+   - **03 — Source Verification:** Compare document details with authorized issuing-authority sources wherever available.
+   - **04 — Regulatory Review:** Present evidence-linked discrepancies and compliance observations to authorized reviewers.
 
-4. **The Actual Regulatory Dashboard**
-   A complete React interface occupying the normal document flow below the 3D scene, featuring an institutional sidebar with **8 core modules in exact required order**.
+4. **The Regulatory Scrutiny Dashboard**
+   A comprehensive regulatory scrutiny cockpit featuring an institutional sidebar with **8 core modules in exact required order**.
 
 ---
 

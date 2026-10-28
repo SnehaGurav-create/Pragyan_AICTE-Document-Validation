@@ -2,17 +2,12 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   ShieldCheck,
-  Building,
-  UserCheck,
-  Scale,
   Lock,
   Mail,
   Key,
   X,
   ArrowRight,
-  CheckCircle2,
   AlertCircle,
-  Bell,
   Sparkles,
 } from 'lucide-react';
 

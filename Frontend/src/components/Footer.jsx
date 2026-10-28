@@ -1,59 +1,100 @@
 import React from 'react';
-import { ArrowUp, Building2, ShieldCheck, Scale } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 
 export function Footer() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleNavClick = (selector) => {
+    const el = document.querySelector(selector);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <footer className="footer-wrapper" aria-label="Portal Footer">
+    <footer className="footer-regulatory-2d" aria-label="Portal Footer">
       <div className="container">
         {/* Main Footer Row */}
-        <div className="footer-top-row">
-          <div className="footer-brand-col">
-            <div className="footer-brand-badge">
-              <span className="footer-brand-title">PRAGYAN-AICTE</span>
-              <span className="footer-brand-pill">Regulation Bureau</span>
+        <div className="footer-columns-grid">
+          {/* Col 1: Identity & SIH Project Summary */}
+          <div className="footer-col-brand">
+            <div className="footer-brand-header">
+              <div className="footer-brand-emblem">
+                <svg viewBox="0 0 28 28" width="24" height="24" fill="none">
+                  <rect x="2" y="2" width="24" height="24" rx="5" fill="#142B4A" />
+                  <path d="M7 8H17M7 13H21M7 18H14" stroke="#8BDCF0" strokeWidth="1.6" strokeLinecap="round" />
+                  <circle cx="18" cy="18" r="6" fill="#356AE6" />
+                  <path d="M15.5 18L17.5 20L20.5 16" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className="footer-brand-name">PRAGYAN-AICTE</span>
             </div>
-            <p className="footer-brand-desc">
-              AI-Powered Application Validation, Document Authentication and Regulatory Compliance Verification.
-              Developed for the Smart India Hackathon 2026 under Problem Statement ID 26261 (Theme: Smart Automation).
+            <p className="footer-brand-mission">
+              AI-Powered Application Validation, Document Authentication and Regulatory Compliance Verification for Technical Education Scrutiny.
             </p>
-            <div className="footer-meta-tags">
-              <span className="footer-tag">AICTE Act 1987 Aligned</span>
-              <span className="footer-tag">Decision Support System</span>
-              <span className="footer-tag">SIH 2026 Prototype</span>
+            <div className="footer-sih-badges">
+              <span className="footer-pill">SIH 2026 · Problem Statement 26261</span>
+              <span className="footer-pill">Theme: Smart Automation</span>
             </div>
           </div>
 
-          <div className="footer-nav-col">
-            <h5 className="footer-col-title">Navigation</h5>
-            <ul className="footer-links-list">
-              <li><a href="#hero-3d-experience">Home</a></li>
-              <li><a href="#workflow">Application Validation</a></li>
-              <li><a href="#regulatory-dashboard">Document Verification</a></li>
-              <li><a href="#regulatory-dashboard">Compliance Review</a></li>
-              <li><a href="#regulatory-dashboard">Dashboard</a></li>
+          {/* Col 2: Navigation Links */}
+          <div className="footer-col-nav">
+            <h4 className="footer-heading">Navigation</h4>
+            <ul className="footer-list">
+              <li>
+                <button type="button" onClick={() => handleNavClick('#hero-section')} className="footer-link-btn">
+                  Overview
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => handleNavClick('#workflow')} className="footer-link-btn">
+                  Workflow
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => handleNavClick('#regulatory-dashboard')} className="footer-link-btn">
+                  Applications Queue
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => handleNavClick('#regulatory-dashboard')} className="footer-link-btn">
+                  Document Verification
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => handleNavClick('#regulatory-dashboard')} className="footer-link-btn">
+                  Compliance Review
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => handleNavClick('#regulatory-dashboard')} className="footer-link-btn">
+                  Dashboard
+                </button>
+              </li>
             </ul>
           </div>
 
-          <div className="footer-nav-col">
-            <h5 className="footer-col-title">Statutory Framework</h5>
-            <ul className="footer-links-list">
-              <li><span>AICTE Act No. 52 of 1987</span></li>
-              <li><span>Approval Process Handbook (APH)</span></li>
-              <li><span>National Building Code (NBC 2016)</span></li>
-              <li><span>7th CPC Faculty Cadre Norms</span></li>
+          {/* Col 3: Statutory References */}
+          <div className="footer-col-nav">
+            <h4 className="footer-heading">Statutory References</h4>
+            <ul className="footer-list">
+              <li><span className="footer-text-item">AICTE Act (Act No. 52 of 1987)</span></li>
+              <li><span className="footer-text-item">Approval Process Handbook (APH 2026-27)</span></li>
+              <li><span className="footer-text-item">National Building Code (NBC 2016 Part 4)</span></li>
+              <li><span className="footer-text-item">7th CPC Faculty Cadre Norms</span></li>
             </ul>
           </div>
 
-          <div className="footer-action-col">
+          {/* Col 4: Back to top action */}
+          <div className="footer-col-action">
             <button
               type="button"
-              className="btn-secondary back-to-top-btn"
+              className="btn-secondary footer-back-btn"
               onClick={scrollToTop}
-              aria-label="Back to top"
+              aria-label="Back to top of page"
             >
               <ArrowUp size={15} />
               <span>Back to Top</span>
@@ -61,18 +102,14 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Disclaimer Bar */}
-        <div className="footer-bottom-bar">
-          <p className="disclaimer-text">
-            <strong>DISCLAIMER & STATUTORY NOTICE:</strong> This application is a standalone academic research prototype
-            developed for Smart India Hackathon (SIH 2026) Problem Statement 26261. It does not represent an official Government
-            of India or live AICTE regulatory portal. All application records, institution names, and reference numbers demonstrated
-            are synthetic demo data. In accordance with the AICTE Act 1987, AI outputs provide preliminary decision support only;
-            competent AICTE authorities retain sole statutory determinism for all regulatory decisions.
+        {/* Bottom Bar: Disclaimer & Copyright */}
+        <div className="footer-bottom-divider" />
+        <div className="footer-disclaimer-row">
+          <p className="footer-disclaimer-text">
+            <strong>STATUTORY DISCLAIMER:</strong> This platform is an academic research prototype engineered for Smart India Hackathon 2026 (Problem Statement ID: 26261). It does not represent the official Government of India or live AICTE public portal. All application identifiers, institutions, and document records displayed are synthetic demo data. In accordance with the AICTE Act 1987, all regulatory decisions remain exclusively with competent AICTE authorities.
           </p>
-          <div className="copyright-row">
-            <span>PRAGYAN-AICTE • SIH 2026 Innovation Prototype (Problem Statement ID: 26261)</span>
-            <span>All India Council for Technical Education (Regulation Bureau)</span>
+          <div className="footer-copyright-text">
+            <span>© 2026 PRAGYAN-AICTE · Regulation Bureau Prototype</span>
           </div>
         </div>
       </div>
